@@ -349,7 +349,7 @@ public OnClientConnected(client)
 	ResetPlayerDmgBasedRegen(client, true);
 	
 	// Kills the annoying 30 second "waiting for players" at the start of a map.
-	ServerCommand("mp_waitingforplayers_cancel 1");
+	// ServerCommand("mp_waitingforplayers_cancel 1");
 }
 
 /* OnClientDisconnect()
