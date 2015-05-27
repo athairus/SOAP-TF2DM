@@ -71,6 +71,10 @@ new g_iRecentDamage[MAXPLAYERS+1][MAXPLAYERS+1][RECENT_DAMAGE_SECONDS],
 //AFK
 new g_bAFKSupported;
 
+//Enable "Waiting for players"
+new Handle:g_hEnableWaitingForPlayers = INVALID_HANDLE,
+	bool:g_bEnableWaitingForPlayers;
+
 // ====[ PLUGIN ]======================================================
 public Plugin:myinfo =
 {
@@ -107,6 +111,7 @@ public OnPluginStart()
 	g_hOpenDoors = CreateConVar("soap_opendoors", "1", "Force all doors to open. Required on maps like cp_well.", FCVAR_PLUGIN|FCVAR_NOTIFY);
 	g_hShowHP = CreateConVar("soap_showhp", "1", "Print killer's health to victim on death.", FCVAR_PLUGIN|FCVAR_NOTIFY);
 	g_hForceTimeLimit  = CreateConVar("soap_forcetimelimit", "1", "Time limit enforcement, used to fix a never-ending round issue on gravelpit.", _, true, 0.0, true, 1.0);
+	g_hEnableWaitingForPlayers  = CreateConVar("soap_enablewaitingforplayers", "0", "Kill the annoying 30 second \"waiting for players\" at the start of a map.", _, true, 0.0, true, 1.0);
 	
 	// Hook convar changes and events
 	HookConVarChange(g_hRegenHP, handler_ConVarChange);
@@ -122,6 +127,7 @@ public OnPluginStart()
 	HookConVarChange(g_hOpenDoors, handler_ConVarChange);
 	HookConVarChange(g_hShowHP, handler_ConVarChange);
 	HookConVarChange(g_hForceTimeLimit, handler_ConVarChange);
+	HookConVarChange(g_hEnableWaitingForPlayers, handler_ConVarChange);
 	HookEvent("player_death", Event_player_death);
 	HookEvent("player_hurt", Event_player_hurt);
 	HookEvent("player_spawn", Event_player_spawn);
@@ -329,6 +335,8 @@ public OnConfigsExecuted()
 	g_bOpenDoors = GetConVarBool(g_hOpenDoors);
 	g_bShowHP = GetConVarBool(g_hShowHP);
 	g_bForceTimeLimit = GetConVarBool(g_hForceTimeLimit);
+	g_bEnableWaitingForPlayers = GetConVarBool(g_hEnableWaitingForPlayers);
+
 }
 
 
@@ -349,7 +357,8 @@ public OnClientConnected(client)
 	ResetPlayerDmgBasedRegen(client, true);
 	
 	// Kills the annoying 30 second "waiting for players" at the start of a map.
-	// ServerCommand("mp_waitingforplayers_cancel 1");
+	if(!g_bEnableWaitingForPlayers)
+		ServerCommand("mp_waitingforplayers_cancel 1");
 }
 
 /* OnClientDisconnect()
@@ -423,6 +432,12 @@ public handler_ConVarChange(Handle:convar, const String:oldValue[], const String
 			g_bShowHP = true;
 		else if(StringToInt(newValue) <= 0)
 			g_bShowHP = false;
+	}
+	else if (convar == g_hEnableWaitingForPlayers) {
+		if(StringToInt(newValue) >= 1)
+			g_bEnableWaitingForPlayers = true;
+		else if(StringToInt(newValue) <= 0)
+			g_bEnableWaitingForPlayers = false;
 	}
 }
 

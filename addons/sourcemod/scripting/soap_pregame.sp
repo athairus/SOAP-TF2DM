@@ -51,6 +51,7 @@ StopDeathmatching()
 {
 	if(g_dm == true)
 	{
+		PrintHintTextToAll("Resetting...");
 		ServerCommand("exec sourcemod/soap_mayhem_off.cfg");
 		// PrintToChatAll("[SOAP] %t", "Plugins unloaded");
 		g_dm = false;
